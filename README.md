@@ -14,3 +14,5 @@ while the _internal is supposed to be... the dirty complex internals :stuck_out_
 2. Execute tests/loginPlayerBot.php with PHP in cli. `php loginPlayerBot.php`
 3. Login on another account and see the player who logged in from PHP. 
 4. Ask him in-game to go in any direction, etc `go right`, `go down` and see the magic happen.
+
+### Initial commit developed by [divinity76](https://github.com/divinity76)
