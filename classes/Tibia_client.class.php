@@ -247,12 +247,8 @@ class Tibia_client_internal
                     $this->xtea_key_binary = random_bytes(4 * 4);
                 }
                 assert(strlen($this->xtea_key_binary) === (4 * 4));
-                foreach (str_split($this->xtea_key_binary, 4) as $tmp) {
-                    assert(strlen($tmp) === 4);
-                    $this->xtea_key_intarray[] = from_little_uint32_t($tmp);
-                }
+                $this->xtea_key_intarray=XTEA::binary_key_to_int_array($this->xtea_key_binary, XTEA::PAD_NONE);
                 assert(count($this->xtea_key_intarray) === 4);
-                unset($tmp);
                 //</xtea_initialization>
             }
             $rsa_data .= $this->xtea_key_binary;
