@@ -115,7 +115,7 @@ class Tibia_binary_serializer
     {
         $ret = $this->peek_position($exception_on_missing_bytes);
         if ($ret !== null) {
-            $this->eraseX(5); // U32 x U32 y U8 z
+            $this->eraseX(5); // U16 x U16 y U8 z
         }
         return $ret;
     }
