@@ -174,7 +174,7 @@ class Tibia_binary_serializer
                 return null;
             }
         }
-        return from_little_uint16_t(substr($this->buf, 0, 2));
+        return from_little_uint32_t(substr($this->buf, 0, 4));
     }
     public function peek_string(bool $exception_on_missing_header = true, bool $exception_on_invalid_header = true): ? string
     {
