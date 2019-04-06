@@ -3,6 +3,7 @@ declare (strict_types = 1);
 require_once('../libs/hhb_.inc.php'); // https://github.com/divinity76/hhb_.inc.php/blob/master/hhb_.inc.php
 require_once('../libs/hhb_datatypes.inc.php'); // https://github.com/divinity76/hhb_.inc.php/blob/master/hhb_datatypes.inc.php
 require_once('../libs/XTEA.class.php'); // https://github.com/divinity76/php-xtea/blob/master/src/xtea.class.php
+require_once('../classes/Tibia_binary_serializer.class.php');
 
 class Tibia_client
 {
@@ -661,22 +662,24 @@ class Tibia_client_internal
             case Tibia_client_packet_parsed::TYPE_SAY: // 0xAA
                 {
                     $ret->type_name = "TYPE_SAY";
+                    // This serializer will do packet parse cleanups for us
+                    $sub_packet = new Tibia_binary_serializer($packet);
+                    
                     // idk what statement_id is either.. my best guess: some weird server-global talk id used by cipsoft for debugging
-                    $ret->data["statement_id"] = from_little_uint32_t(substr($packet, 0, 4));
-                    $packet = substr($packet, 4);
-                    $strlen = strlen(($ret->data['speaker_name'] = self::parse_tibia_str($packet)));
-                    $packet = substr($packet, $strlen + 2);
-                    $ret->data['speaker_level'] = from_little_uint16_t(substr($packet, 0, 2));
-                    $packet = substr($packet, 2);
-                    $ret->data['speak_type'] = from_uint8_t(substr($packet, 0, 1));
-                    $packet = substr($packet, 1);
-                    $ret->data['speaker_position'] = self::parse_position($packet);
-                    $packet = substr($packet, self::POSITION_SIZE_BYTES);
-                    $strlen = strlen(($ret->data['text'] = self::parse_tibia_str($packet)));
-                    $packet = substr($packet, $strlen + 2);
-                    if (strlen($packet) !== 0) {
-                        $ret->warnings[] = "warning, trailing bytes i don't understand at end of speaking packet (hex): " . bin2hex($packet);
-                    }
+                    $ret->data["statement_id"] = $sub_packet->getU32();
+                    //$ret->data["statement_id"] = from_little_uint32_t(substr($packet, 0, 4));
+                    //$packet = substr($packet, 4);// obsolete after sub_packet handling
+
+                    $ret->data['speaker_name'] = $sub_packet->get_string();
+                    $ret->data['speaker_level'] = $sub_packet->getU16();
+                    $ret->data['speak_type'] = $sub_packet->getU8();
+                    $ret->data['speaker_position'] = $sub_packet->get_position();
+                    $ret->data['text'] = $sub_packet->get_string();
+                    
+                    // Tell packet parser that your done, 
+                    // if it disagrees with you, there is still data in packet.
+                    // And it will give you a warning
+                    $ret->warnings = $sub_packet->im_done($ret->warnings);
                     return $ret;
                     unset($strlen);
                     break;
@@ -706,6 +709,7 @@ class Tibia_client_packet_parsed
     public $bytes_hex = "";
     public $data = [];
     public $errors = [];
+    public $warnings = [];
 }
 
 

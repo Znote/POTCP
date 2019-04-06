@@ -5,6 +5,14 @@ class Tibia_binary_serializer
 {
     // should probably be protected not public, buuuut....
     public $buf = "";
+    // Takes in an array of errors/warnings, passing it back with additional errors should they occur (if not empty)
+    public function im_done($return_warnings): array 
+    {
+        if (strlen($this->buf) !== 0) {
+            $return_warnings[] = "warning, trailing bytes i don't understand at end of speaking packet (hex): " . bin2hex($this->buf);
+        }
+        return $return_warnings;
+    }
     public function str(): string
     {
         return $this->buf;
