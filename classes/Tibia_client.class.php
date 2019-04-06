@@ -679,7 +679,7 @@ class Tibia_client_internal
                     // Tell packet parser that your done, 
                     // if it disagrees with you, there is still data in packet.
                     // And it will give you a warning
-                    $ret->warnings = $sub_packet->im_done($ret->warnings);
+                    $ret->warnings = $sub_packet->im_done($ret->warnings, $ret->type_name);
                     return $ret;
                     unset($strlen);
                     break;
