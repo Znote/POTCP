@@ -319,7 +319,7 @@ class Tibia_client_internal
         $buf = '';
         // 2 bytes: tibia packet size header, little-endian uint16
         $ret = socket_recv($this->socket, $buf, 2, $flag);
-        if ($ret === 0 || ($ret === false && socket_last_error($this->socket) === 11)) { // 11: resource temporarily unavailable
+        if ($ret === 0 || ($ret === false && socket_last_error($this->socket) === SOCKET_EWOULDBLOCK)) { // 11: resource temporarily unavailable
             // no new packet available
             if (!$wait_for_packet) {
                 // .. and we're not waiting.
