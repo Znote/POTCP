@@ -49,10 +49,9 @@ class Tibia_client
                     "(also it can't be private-message or channel-message talk type but i cba writing the code to detect it right now)"
             );
         }
-        $packet = "\x96"; // talk packet
-        $packet .= to_uint8_t($type);
-        $packet .= $this->internal->tibia_str($message);
-        $this->internal->send($packet);
+	$packet=new Tibia_binary_serializer("\x96");
+        $packet->addU8($type)->add_string($message);
+        $this->internal->send($packet->str());
     }
     // alias of walk_north
     public function walk_up(int $steps = 1) : void
