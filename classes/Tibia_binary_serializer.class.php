@@ -21,7 +21,7 @@ class Tibia_binary_serializer
     {
         $this->buf = $initial_buffer;
     }
-    public function eraseX(int $bytes_from_start, int $bytes_from_end = 0): void
+    public function eraseX(int $bytes_from_start, int $bytes_from_end = 0): self
     {
         if ($bytes_from_start < 0) {
             throw new \InvalidArgumentException('$bytes_from_start<0');
@@ -45,44 +45,51 @@ class Tibia_binary_serializer
         } else {
             // nothing to do, both are 0.
         }
+        return $this;
     }
     //<add_functions>
-    public function add(string $bytes): void
+    public function add(string $bytes): self
     {
         $this->buf .= $bytes;
+        return $this;
     }
-    public function add_string(string $str): void
+    public function add_string(string $str): self
     {
         if (($len = strlen($str)) > 0xFFFF) {
             throw new \InvalidArgumentException("max length of a tibia string is 65535 bytes.");
         }
         $this->buf .= to_little_uint16_t($len) . $str;
+        return $this;
     }
-    public function add_position(int $x, int $y, int $z): void
+    public function add_position(int $x, int $y, int $z): self
     {
         //TODO: input validation/invalidArgumentException (x < 0 > 0xFFFF y < 0 > 0xFFFF z < 0 > 0xFF )
         $this->buf .= to_little_uint16_t($x) . to_little_uint16_t($y) . to_uint8_t($z);
+        return $this;
     }
-    public function addU8(int $i): void
+    public function addU8(int $i): self
     {
         if ($i < 0 || $i > 0xFF) {
             throw new \InvalidArgumentException("must be between 0-255");
         }
         $this->buf .= to_uint8_t($i);
+        return $this;
     }
-    public function addU16(int $i): void
+    public function addU16(int $i): self
     {
         if ($i < 0 || $i > 0xFFFF) {
             throw new \InvalidArgumentException("must be between 0-65535");
         }
         $this->buf .= to_little_uint16_t($i);
+        return $this;
     }
-    public function addU32(int $i): void
+    public function addU32(int $i): self
     {
         if ($i < 0 || $i > 0xFFFFFFFF) {
             throw new \InvalidArgumentException("must be between 0-4294967295");
         }
         $this->buf .= to_little_uint32_t($i);
+        return $this;
     }
     // the tibia protocol never use 64 bit (nor above) integers AFAIK, so no need to support it here.
     //</add_functions>
