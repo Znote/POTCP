@@ -17,6 +17,10 @@ class Tibia_binary_serializer
     {
         return $this->buf;
     }
+    public function str_with_size_header(): string
+    {
+        return (new Tibia_binary_serializer())->add_string($this->str())->str();
+    }
     function __construct(string $initial_buffer = "")
     {
         $this->buf = $initial_buffer;
