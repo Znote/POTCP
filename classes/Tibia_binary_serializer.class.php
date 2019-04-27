@@ -8,7 +8,7 @@ class Tibia_binary_serializer
     // Takes in an array of errors/warnings, passing it back with additional errors should they occur (if not empty)
     public function im_done(array $return_warnings = [], string $packet_type = 'TYPE_THIS'): array 
     {
-        if (strlen($this->buf) !== 0) {
+        if ($this->size() !== 0) {
             $return_warnings[] = "warning, trailing bytes i don't understand at end of {$packet_type} packet (hex): " . bin2hex($this->buf);
         }
         return $return_warnings;
@@ -20,6 +20,11 @@ class Tibia_binary_serializer
     public function str_with_size_header(): string
     {
         return (new Tibia_binary_serializer())->add_string($this->str())->str();
+    }
+    // return size of buffer
+    public function size(): int
+    {
+        return strlen($this->str());
     }
     function __construct(string $initial_buffer = "")
     {
@@ -33,7 +38,7 @@ class Tibia_binary_serializer
         if ($bytes_from_end < 0) {
             throw new \InvalidArgumentException('$bytes_from_end<0');
         }
-        $blen = strlen($this->buf);
+        $blen = $this->size();
         $total = $bytes_from_start + $bytes_from_end;
         if ($total > $blen) {
             // is UnderflowException appropriate here?
@@ -160,7 +165,7 @@ class Tibia_binary_serializer
     // }
     public function peekU8(bool $exception_on_missing_bytes = true): ? int
     {
-        $blen = strlen($this->buf);
+        $blen = $this->size();
         if ($blen < 1) {
             if ($exception_on_missing_bytes) {
                 // is UnderflowException appropriate here?
@@ -173,7 +178,7 @@ class Tibia_binary_serializer
     }
     public function peekU16(bool $exception_on_missing_bytes = true): ? int
     {
-        $blen = strlen($this->buf);
+        $blen = $this->size();
         if ($blen < 2) {
             if ($exception_on_missing_bytes) {
                 throw new \UnderflowException();
@@ -185,7 +190,7 @@ class Tibia_binary_serializer
     }
     public function peekU32(bool $exception_on_missing_bytes = true): ? int
     {
-        $blen = strlen($this->buf);
+        $blen = $this->size();
         if ($blen < 4) {
             if ($exception_on_missing_bytes) {
                 throw new \UnderflowException();
@@ -197,11 +202,11 @@ class Tibia_binary_serializer
     }
     public function peek_string(bool $exception_on_missing_header = true, bool $exception_on_invalid_header = true): ? string
     {
-        $blen = strlen($this->buf);
         $strlen = $this->peekU16($exception_on_missing_header);
         if ($strlen === null) {
             return null;
         }
+        $blen = $this->size();
         if (($blen - 2) < $strlen) {
             if ($exception_on_invalid_header) {
                 throw new \UnderflowException();
@@ -213,7 +218,7 @@ class Tibia_binary_serializer
     }
     public function peek_position(bool $exception_on_missing_bytes = true): ? array
     {
-        $blen = strlen($this->buf);
+        $blen = $this->size();
         if ($blen < 5) {
             if ($exception_on_missing_bytes) {
                 throw new \UnderflowException();
