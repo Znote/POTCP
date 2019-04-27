@@ -165,8 +165,7 @@ class Tibia_binary_serializer
     // }
     public function peekU8(bool $exception_on_missing_bytes = true): ? int
     {
-        $blen = $this->size();
-        if ($blen < 1) {
+        if ($this->size() < 1) {
             if ($exception_on_missing_bytes) {
                 // is UnderflowException appropriate here?
                 throw new \UnderflowException();
@@ -178,8 +177,7 @@ class Tibia_binary_serializer
     }
     public function peekU16(bool $exception_on_missing_bytes = true): ? int
     {
-        $blen = $this->size();
-        if ($blen < 2) {
+        if ($this->size() < 2) {
             if ($exception_on_missing_bytes) {
                 throw new \UnderflowException();
             } else {
@@ -190,8 +188,7 @@ class Tibia_binary_serializer
     }
     public function peekU32(bool $exception_on_missing_bytes = true): ? int
     {
-        $blen = $this->size();
-        if ($blen < 4) {
+        if ($this->size() < 4) {
             if ($exception_on_missing_bytes) {
                 throw new \UnderflowException();
             } else {
@@ -206,8 +203,7 @@ class Tibia_binary_serializer
         if ($strlen === null) {
             return null;
         }
-        $blen = $this->size();
-        if (($blen - 2) < $strlen) {
+        if (($this->size() - 2) < $strlen) {
             if ($exception_on_invalid_header) {
                 throw new \UnderflowException();
             } else {
@@ -218,8 +214,7 @@ class Tibia_binary_serializer
     }
     public function peek_position(bool $exception_on_missing_bytes = true): ? array
     {
-        $blen = $this->size();
-        if ($blen < 5) {
+        if ($this->size() < 5) {
             if ($exception_on_missing_bytes) {
                 throw new \UnderflowException();
             } else {
