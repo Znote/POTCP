@@ -25,7 +25,7 @@ class Tibia_client
      *
      * @return void
      */
-    public function ping() : void
+    public function ping(): void
     {
         $this->internal->ping();
     }
@@ -35,7 +35,7 @@ class Tibia_client
     const TALKTYPE_BROADCAST = 13;
     const TALKTYPE_MONSTER_SAY = 36;
     const TALKTYPE_MONSTER_YELL = 37;
-    public function say(string $message, int $type = self::TALKTYPE_SAY) : void
+    public function say(string $message, int $type = self::TALKTYPE_SAY): void
     {
         if (strlen($message) > 255) {
             throw new InvalidArgumentException(
@@ -49,17 +49,16 @@ class Tibia_client
                     "(also it can't be private-message or channel-message talk type but i cba writing the code to detect it right now)"
             );
         }
-        $packet = "\x96"; // talk packet
-        $packet .= to_uint8_t($type);
-        $packet .= $this->internal->tibia_str($message);
-        $this->internal->send($packet);
+        $packet = new Tibia_binary_serializer("\x96"); // 0x96: talk packet
+        $packet->addU8($type)->add_string($message);
+        $this->internal->send($packet->str());
     }
     // alias of walk_north
-    public function walk_up(int $steps = 1) : void
+    public function walk_up(int $steps = 1): void
     {
         $this->walk_north($steps);
     }
-    public function walk_north(int $steps = 1) : void
+    public function walk_north(int $steps = 1): void
     {
         //todo: invalidargumentexception < 0
         //optimization note: steps can be concatenated nagle-style and issued in a single packet
@@ -68,11 +67,11 @@ class Tibia_client
         }
     }
     // alias of walk_east
-    public function walk_right(int $steps = 1) : void
+    public function walk_right(int $steps = 1): void
     {
         $this->walk_east($steps);
     }
-    public function walk_east(int $steps = 1) : void
+    public function walk_east(int $steps = 1): void
     {
         //todo: invalidargumentexception < 0
         //optimization note: steps can be concatenated nagle-style and issued in a single packet
@@ -81,11 +80,11 @@ class Tibia_client
         }
     }
     // alias of walk_south
-    public function walk_down(int $steps = 1) : void
+    public function walk_down(int $steps = 1): void
     {
         $this->walk_south($steps);
     }
-    public function walk_south(int $steps = 1) : void
+    public function walk_south(int $steps = 1): void
     {
         //todo: invalidargumentexception < 0
         //optimization note: steps can be concatenated nagle-style and issued in a single packet
@@ -94,11 +93,11 @@ class Tibia_client
         }
     }
     // alias of walk_west
-    public function walk_left(int $steps = 1) : void
+    public function walk_left(int $steps = 1): void
     {
         $this->walk_west($steps);
     }
-    public function walk_west(int $steps = 1) : void
+    public function walk_west(int $steps = 1): void
     {
         //todo: invalidargumentexception < 0
         //optimization note: steps can be concatenated nagle-style and issued in a single packet
@@ -108,10 +107,10 @@ class Tibia_client
     }
     public function dance(int $moves = 10, int $msleep = 100)
     {
-    //  case 0x6F: addGameTaskTimed(DISPATCHER_TASK_EXPIRATION, &Game::playerTurn, player->getID(), DIRECTION_NORTH); break;
-	//	case 0x70: addGameTaskTimed(DISPATCHER_TASK_EXPIRATION, &Game::playerTurn, player->getID(), DIRECTION_EAST); break;
-	//	case 0x71: addGameTaskTimed(DISPATCHER_TASK_EXPIRATION, &Game::playerTurn, player->getID(), DIRECTION_SOUTH); break;
-	//	case 0x72: addGameTaskTimed(DISPATCHER_TASK_EXPIRATION, &Game::playerTurn, player->getID(), DIRECTION_WEST); break;
+        //  case 0x6F: addGameTaskTimed(DISPATCHER_TASK_EXPIRATION, &Game::playerTurn, player->getID(), DIRECTION_NORTH); break;
+        //	case 0x70: addGameTaskTimed(DISPATCHER_TASK_EXPIRATION, &Game::playerTurn, player->getID(), DIRECTION_EAST); break;
+        //	case 0x71: addGameTaskTimed(DISPATCHER_TASK_EXPIRATION, &Game::playerTurn, player->getID(), DIRECTION_SOUTH); break;
+        //	case 0x72: addGameTaskTimed(DISPATCHER_TASK_EXPIRATION, &Game::playerTurn, player->getID(), DIRECTION_WEST); break;
         $direction_bytes = "\x6F\x70\x71\x72";
         $blen = strlen($direction_bytes) - 1;
         $last = null;
@@ -134,7 +133,7 @@ class Tibia_client_internal
     const TIBIA_CLIENT_OS_INT = 4;
     const TIBIA_CLIENT_OS_STRING = 'CLIENTOS_WINDOWS';
     const RSA_PUBLIC_KEY =
-        "-----BEGIN PUBLIC KEY-----\n" .
+    "-----BEGIN PUBLIC KEY-----\n" .
         "MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQCbZGkDtFsHrJVlaNhzU71xZROd\n" .
         "15QHA7A+bdB5OZZhtKg3qmBWHXzLlFL6AIBZSQmIKrW8pYoaGzX4sQWbcrEhJhHG\n" .
         "FSrT27PPvuetwUKnXT11lxUJwyHFwkpb1R/UYPAbThW+sN4ZMFKKXT8VwePL9cQB\n" .
@@ -151,7 +150,7 @@ class Tibia_client_internal
     public $charname;
     protected $socket;
     /** @var string $xtea_key_binary */
-    protected $xtea_key_binary;//CS-random-generated for each instance. unless $debugging
+    protected $xtea_key_binary; //CS-random-generated for each instance. unless $debugging
     /** @var int[4] $xtea_key_intarray */
     protected $xtea_key_intarray;
     function __construct(string $host, int $port, string $account, string $password, string $charname, bool $debugging = false)
@@ -169,6 +168,7 @@ class Tibia_client_internal
                 throw new \RuntimeException("could only find an ipv6 address for that host, ipv6 support is (not yet?) implemented!");
             }
         }
+        //
         {
             $this->public_key_parsed_cache = openssl_pkey_get_public($this::RSA_PUBLIC_KEY);
             if (false === $this->public_key_parsed_cache) {
@@ -199,11 +199,11 @@ class Tibia_client_internal
      * @param string $data
      * @return string binary
      */
-    public static function Adler32le(string $data) : string
+    public static function Adler32le(string $data): string
     {
         return strrev(hash('adler32', $data, true));
     }
-    protected function login() : void
+    protected function login(): void
     {
         if (!!$this->socket) {
             throw new \LogicException("socket already initialized during login()! ");
@@ -228,54 +228,53 @@ class Tibia_client_internal
             $err = socket_last_error($this->socket);
             throw new \RuntimeException("setting TCP_NODELAY failed! {$err}: " . socket_strerror($err));
         }
-
+        // 
         {
-            $data = "";
-            $data .= "\x00"; // "protocol id byte", i guess it's different for login protocol / game protocol / status protocol / etc, but seems to be ignored by TFS
-            $data .= to_little_uint16_t($this::TIBIA_CLIENT_OS_INT);
-            $data .= to_little_uint16_t($this::TIBIA_VERSION_INT);
-            $data .= str_repeat("\x00", 7); // > msg.skipBytes(7); // U32 client version, U8 client type, U16 dat revision
-            $rsa_data = "\x00"; // uhh... RSA decryption verification byte? (TFS considers the RSA decryption a success if this is 0 AFTER decryption.)
+            $data = new Tibia_binary_serializer();
+            $data->add("\x00"); // "protocol id byte", i guess it's different for login protocol / game protocol / status protocol / etc, but seems to be ignored by TFS
+            $data->addU16($this::TIBIA_CLIENT_OS_INT);
+            $data->addU16($this::TIBIA_VERSION_INT);
+            $data->add(str_repeat("\x00", 7)); // > msg.skipBytes(7); // U32 client version, U8 client type, U16 dat revision
+            $rsa_data = new Tibia_binary_serializer();
+            $rsa_data->add("\x00"); // uhh... RSA decryption verification byte? (TFS considers the RSA decryption a success if this is 0 AFTER decryption.)
             {
                 //<xtea_initialization>
                 if ($this->debugging) {
-                // nice keys for debugging (but insecure)
-                    $this->xtea_key_binary = $this->tibia_str("xtea_key_12345");
-                    $this->xtea_key_binary = str_repeat(to_little_uint32_t(1337), 4);
+                    // nice keys for debugging (but insecure)
+                    $this->xtea_key_binary = (new Tibia_binary_serializer())->add_string("xtea_key_12345")->str();
+                    $this->xtea_key_binary = str_repeat((new Tibia_binary_serializer())->addU32(1337)->str(), 4);
                     $this->xtea_key_binary = str_repeat("\x00", 4 * 4);
                 } else {
-                // secure key, not good for debugging.
+                    // secure key, not good for debugging.
                     $this->xtea_key_binary = random_bytes(4 * 4);
                 }
                 assert(strlen($this->xtea_key_binary) === (4 * 4));
-                $this->xtea_key_intarray=XTEA::binary_key_to_int_array($this->xtea_key_binary, XTEA::PAD_NONE);
+                $this->xtea_key_intarray = XTEA::binary_key_to_int_array($this->xtea_key_binary, XTEA::PAD_NONE);
                 assert(count($this->xtea_key_intarray) === 4);
                 //</xtea_initialization>
             }
-            $rsa_data .= $this->xtea_key_binary;
-            $rsa_data .= "\x00"; // gamemaster flag (back in tibia 7.6 it was 0 for regular players and 2 for GMs iirc. TFS ignores it.)
-            $firstPacket = $this->read_next_packet(true, true, false, false);
-            if (strlen($firstPacket) !== 12) {
-                throw new \LogicException("first packet was not 12 bytes! .... " . strlen($firstPacket));
+            $rsa_data->add($this->xtea_key_binary);
+            $rsa_data->add("\x00"); // gamemaster flag (back in tibia 7.6 it was 0 for regular players and 2 for GMs iirc. TFS ignores it.)
+            $firstPacket = new Tibia_binary_serializer($this->read_next_packet(true, true, false, false));
+            if ($firstPacket->size() !== 12) {
+                throw new \LogicException("first packet was not 12 bytes! .... " . $firstPacket->size());
             }
-            $firstPacket = substr($firstPacket, 7); //TODO: what are these 7 skipped bytes? i don't know.
-            $challengeTimestamp = from_little_uint32_t(substr($firstPacket, 0, 4));
-            $firstPacket = substr($firstPacket, 4);
-            $challengeRandom = from_uint8_t($firstPacket[0]);
-            $firstPacket = substr($firstPacket, 1);
-            assert(0 === strlen($firstPacket));
+            $firstPacket->eraseX(7); //TODO: what are these 7 skipped bytes? i don't know.
+            $challengeTimestamp = $firstPacket->getU32();
+            $challengeRandom = $firstPacket->getU8();
+            assert(0 === $firstPacket->size());
             $session_data = implode("\n", array(
                 $this->account,
                 $this->password,
                 '???what is this token???',
-                ((string)time())// ??token time??
+                ((string)time()) // ??token time??
             ));
-            $rsa_data .= $this->tibia_str($session_data);
-            $rsa_data .= $this->tibia_str($this->charname);
-            $rsa_data .= to_little_uint32_t($challengeTimestamp);
-            $rsa_data .= to_uint8_t($challengeRandom);
-            $data .= $this->RSA_encrypt($rsa_data);
-            $this->send($data, true, true, false);
+            $rsa_data->add_string($session_data);
+            $rsa_data->add_string($this->charname);
+            $rsa_data->addU32($challengeTimestamp);
+            $rsa_data->addU8($challengeRandom);
+            $data->add($this->RSA_encrypt($rsa_data->str()));
+            $this->send($data->str(), true, true, false);
             // if we don't sleep a little after logging in, nothing will work, talking, walking, etc won't respond for the first
             // few milliseconds or so. (???)
             usleep(100 * 1000);
@@ -296,7 +295,7 @@ class Tibia_client_internal
      * @param boolean $xtea_decrypt
      * @return string|null
      */
-    public function read_next_packet(bool $wait_for_packet, bool $remove_size_header = true, bool $remove_adler_checksum = true, bool $xtea_decrypt = true, bool &$adler_removed = null, bool &$xtea_decrypted = null) : ? string
+    public function read_next_packet(bool $wait_for_packet, bool $remove_size_header = true, bool $remove_adler_checksum = true, bool $xtea_decrypt = true, bool &$adler_removed = null, bool &$xtea_decrypted = null): ?string
     {
         if ($xtea_decrypt && !$remove_adler_checksum) {
             throw new \InvalidArgumentException(
@@ -437,11 +436,12 @@ class Tibia_client_internal
      *
      * @return void
      */
-    public function ping() : void
+    public function ping(): void
     {
         $this->send("\x1E");
     }
     /**
+     * *DEPRECATED* you should probably use Tibia_binary_serializer()->get_string() instead.
      * parse tibia_str
      * if it is a valid tibia_str, returns the tibia str, length header and trailing bytes removed.
      * if it's *not* a valid tibia_str, returns null
@@ -451,45 +451,23 @@ class Tibia_client_internal
      * @param integer $offset
      * @return string|null
      */
-    public static function parse_tibia_str(string $bytes/*, int $offset = 0 */ ) : ? string
+    public static function parse_tibia_str(string $bytes): ?string
     {
-        $len = strlen($bytes);
-        if ($len < 2) {
-            // not a tibia_str.
-            return null;
-        }
-        $claimed_len = from_little_uint16_t(substr($bytes, 0, 2));
-        if ($len < ($claimed_len + 2)) {
-            // not a tibia_str.
-            return null;
-        }
-        // valid tibia_str. (even if it has trailing bytes, which are ignored.)
-        $ret = substr($bytes, 2, $claimed_len);
-        return $ret;
+        return (new Tibia_binary_serializer($bytes))->get_string(false, false);
     }
     const POSITION_SIZE_BYTES = 5;
-    public static function parse_position(string $bytes) : ? array
+    // *DEPRECATED* you should probably use Tibia_binary_serializer()->get_position() instead.
+    public static function parse_position(string $bytes): ?array
     {
-        $len = strlen($bytes);
-        if ($len < self::POSITION_SIZE_BYTES) {
-            return null;
-        }
-        $ret = array();
-        $ret['x'] = from_little_uint16_t(substr($bytes, 0, 2));
-        $ret['y'] = from_little_uint16_t(substr($bytes, 2, 2));
-        $ret['z'] = from_uint8_t(substr($bytes, 4, 1));
-        return $ret;
+        return (new Tibia_binary_serializer($bytes))->get_position(false);
     }
-    public function tibia_str(string $str) : string
+    // *DEPRECATED* you should probably use Tibia_binary_serializer()->add_string() instead.
+    public function tibia_str(string $str): string
     {
-        $len = strlen($str);
-        if ($len > 65535) {
-            throw new OutOfRangeException('max length of a tibia_str is 65535 bytes! (i think..)');
-        }
-        return to_little_uint16_t($len) . $str;
+        return (new Tibia_binary_serializer())->add_string($str)->str();
     }
     // openssl api has 3 different standarized padding schemes for RSA, and obviously cipsoft went all "NIH" and made their own
-    public /*static*/ function cipsoft_rsa_pad(string &$data) : void
+    public /*static*/ function cipsoft_rsa_pad(string &$data): void
     {
         if ((($len = strlen($data)) % 128) === 0) {
             return;
@@ -505,7 +483,7 @@ class Tibia_client_internal
         }
         return;
     }
-    public function RSA_encrypt(string $data) : string
+    public function RSA_encrypt(string $data): string
     {
         assert(!!$this->public_key_parsed_cache);
         $crypted = '';
@@ -520,10 +498,10 @@ class Tibia_client_internal
         }
         return $crypted;
     }
-    protected function logout() : void
+    protected function logout(): void
     {
         try {
-            $this->send("\x14");            
+            $this->send("\x14");
             // TFS bug? if we send the disconnect request too fast before closing the socket,
             // the server will not log out the actual avatar..
             //usleep(50000*1000);
@@ -532,17 +510,16 @@ class Tibia_client_internal
             }
             $this->send("\x0F");
             usleep(100 * 1000);
-        }
-        finally {
+        } finally {
             if ($this->socket) {
                 socket_close($this->socket);
             }
         }
     }
-    public function send(string $packet, bool $add_size_header = true, bool $add_adler_checksum = true, bool $xtea_encrypt = true) : void
+    public function send(string $packet, bool $add_size_header = true, bool $add_adler_checksum = true, bool $xtea_encrypt = true): void
     {
         if ($xtea_encrypt) {
-            $packet = XTEA::encrypt($this->tibia_str($packet), $this->xtea_key_intarray, ($this->debugging ? XTEA::PAD_0x00 : XTEA::PAD_RANDOM));
+            $packet = XTEA::encrypt((new Tibia_binary_serializer())->add_string($packet)->str(), $this->xtea_key_intarray, ($this->debugging ? XTEA::PAD_0x00 : XTEA::PAD_RANDOM));
         }
         if ($add_adler_checksum) {
             $packet = $this->Adler32le($packet) . $packet;
@@ -555,7 +532,7 @@ class Tibia_client_internal
                 // before calling send()
                 throw new OutOfRangeException('Cannot automatically add size header a to a packet above 65535 bytes!');
             }
-            $packet = to_little_uint16_t($len) . $packet;
+            $packet = (new Tibia_binary_serializer())->add_string($packet)->str();
         }
         $this->socket_write_all($this->socket, $packet);
     }
@@ -566,7 +543,7 @@ class Tibia_client_internal
      * @param string $data
      * @return void
      */
-    public static function socket_write_all($socket, string $data) : void
+    public static function socket_write_all($socket, string $data): void
     {
         if (!($dlen = strlen($data))) {
             return;
@@ -596,11 +573,11 @@ class Tibia_client_internal
         } while ($dlen > 0);
         assert($dlen === 0);
         assert(strlen($data) === 0);
-    // all data sent.
+        // all data sent.
         return;
     }
 
-    public static function parse_packet(string $packet, bool $size_header_removed = true, bool $adler_checksum_removed = true, bool $xtea_decrypted = true) : Tibia_client_packet_parsed
+    public static function parse_packet(string $packet, bool $size_header_removed = true, bool $adler_checksum_removed = true, bool $xtea_decrypted = true): Tibia_client_packet_parsed
     {
         // for now i cba writing stuff to handle size header / adler checksum / xtea encryption in here...
         if (!$size_header_removed) {
@@ -621,20 +598,19 @@ class Tibia_client_internal
             $ret->type_name = "ping_0_bytes"; // ping_tcp_keepalive ? 
             return $ret;
         }
-        $ret->type = from_uint8_t(substr($packet, 0, 1));
-        $packet = substr($packet, 1);
+        $packet = new Tibia_binary_serializer($packet);
+        $ret->type = $packet->getU8();
         switch ($ret->type) {
-            case 0x0D:
-                {
+            case 0x0D: {
                     // seems to be either ping or ping_request (eg a request that we ping back)
                     $ret->type_name = "ping_0x0D";
                     return $ret;
                     break;
                 }
-            case 0x17:
-                {
-                // TODO: better parsing of this packet, which is a big task (this packet is very very complex for some reason.)
+            case 0x17: {
+                    // TODO: better parsing of this packet, which is a big task (this packet is very very complex for some reason.)
                     $ret->type_name = "login_and_map_and_welcome";
+                    $packet = $packet->str();
                     $welcome_messages = [];
                     $found = 0;
                     $ret->data['welcome_messages'] = [];
@@ -662,30 +638,22 @@ class Tibia_client_internal
             case Tibia_client_packet_parsed::TYPE_SAY: // 0xAA
                 {
                     $ret->type_name = "TYPE_SAY";
-                    // This serializer will do packet parse cleanups for us
-                    $sub_packet = new Tibia_binary_serializer($packet);
-                    
                     // idk what statement_id is either.. my best guess: some weird server-global talk id used by cipsoft for debugging
-                    $ret->data["statement_id"] = $sub_packet->getU32();
-                    //$ret->data["statement_id"] = from_little_uint32_t(substr($packet, 0, 4));
-                    //$packet = substr($packet, 4);// obsolete after sub_packet handling
-
-                    $ret->data['speaker_name'] = $sub_packet->get_string();
-                    $ret->data['speaker_level'] = $sub_packet->getU16();
-                    $ret->data['speak_type'] = $sub_packet->getU8();
-                    $ret->data['speaker_position'] = $sub_packet->get_position();
-                    $ret->data['text'] = $sub_packet->get_string();
-                    
+                    $ret->data["statement_id"] = $packet->getU32();
+                    $ret->data['speaker_name'] = $packet->get_string();
+                    $ret->data['speaker_level'] = $packet->getU16();
+                    $ret->data['speak_type'] = $packet->getU8();
+                    $ret->data['speaker_position'] = $packet->get_position();
+                    $ret->data['text'] = $packet->get_string();
                     // Tell packet parser that your done, 
                     // if it disagrees with you, there is still data in packet.
                     // And it will give you a warning
-                    $ret->warnings = $sub_packet->im_done($ret->warnings, $ret->type_name);
+                    $ret->warnings = $packet->im_done($ret->warnings, $ret->type_name);
                     return $ret;
                     unset($strlen);
                     break;
                 }
-            default:
-                {
+            default: {
                     $ret->type_name = "unknown 0x" . bin2hex(to_uint8_t($ret->type));
                     return $ret;
                     break;
@@ -711,5 +679,3 @@ class Tibia_client_packet_parsed
     public $errors = [];
     public $warnings = [];
 }
-
-
