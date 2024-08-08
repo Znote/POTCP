@@ -1,9 +1,9 @@
 <?php
 declare (strict_types = 1);
-require_once('../libs/hhb_.inc.php'); // https://github.com/divinity76/hhb_.inc.php/blob/master/hhb_.inc.php
-require_once('../libs/hhb_datatypes.inc.php'); // https://github.com/divinity76/hhb_.inc.php/blob/master/hhb_datatypes.inc.php
-require_once('../libs/XTEA.class.php'); // https://github.com/divinity76/php-xtea/blob/master/src/xtea.class.php
-require_once('../classes/Tibia_binary_serializer.class.php');
+require_once(__DIR__ . '/../libs/hhb_.inc.php'); // https://github.com/divinity76/hhb_.inc.php/blob/master/hhb_.inc.php
+require_once(__DIR__ . '/../libs/hhb_datatypes.inc.php'); // https://github.com/divinity76/hhb_.inc.php/blob/master/hhb_datatypes.inc.php
+require_once(__DIR__ . '/../libs/XTEA.class.php'); // https://github.com/divinity76/php-xtea/blob/master/src/xtea.class.php
+require_once(__DIR__ . '/../classes/Tibia_binary_serializer.class.php');
 
 class Tibia_client
 {

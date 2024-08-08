@@ -1,7 +1,7 @@
 <?php 
 declare (strict_types = 1);
 
-require_once('../classes/Tibia_client.class.php');
+require_once(__DIR__ . '/../classes/Tibia_client.class.php');
 /* Tibia_client.class.php also loads:
 	libs/hhb_.inc.php
 	libs/hhb_datatypes.inc.php
