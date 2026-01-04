@@ -3,8 +3,8 @@ declare (strict_types = 1);
 // 7.6 protocol version of Tibia_Client
 // WARNING: this file is unmaintained and incompatible with the other Tibia_Client 
 // (mostly compatible but with differences, for example Tibia_Client_Internal::send() takes only 2 arguments, rather than the 4x that 10.x version takes)
-require_once('../libs/hhb_.inc.php'); // https://github.com/divinity76/hhb_.inc.php/blob/master/hhb_.inc.php
-require_once('../classes/Tibia_binary_serializer.class.php');
+require_once(__DIR__ . '/../libs/hhb_.inc.php'); // https://github.com/divinity76/hhb_.inc.php/blob/master/hhb_.inc.php
+require_once(__DIR__ . '/../classes/Tibia_binary_serializer.class.php');
 class Tibia_client
 {
     /** @var Tibia_client_internal $internal */

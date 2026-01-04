@@ -1,6 +1,6 @@
 <?php
 declare (strict_types = 1);
-require_once('../libs/hhb_datatypes.inc.php'); // https://github.com/divinity76/hhb_.inc.php/blob/master/hhb_datatypes.inc.php
+require_once(__DIR__ . '/../libs/hhb_datatypes.inc.php'); // https://github.com/divinity76/hhb_.inc.php/blob/master/hhb_datatypes.inc.php
 class Tibia_binary_serializer
 {
     // should probably be protected not public, buuuut....

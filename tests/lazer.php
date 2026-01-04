@@ -1,6 +1,6 @@
 <?php
-require_once('../libs/hhb_.inc.php');
-require_once('../libs/XTEA.class.php');
+require_once(__DIR__ . '/../libs/hhb_.inc.php');
+require_once(__DIR__ . '/../libs/XTEA.class.php');
 $xtea = new XTEA("secret Key");
 $xtea->cbc = false;
 $original = "\xFF";
